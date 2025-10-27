@@ -1,0 +1,13 @@
+{
+  "version": "5",
+  "dialect": "pg",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "5",
+      "when": 1761475830265,
+      "tag": "0000_soft_steel_serpent",
+      "breakpoints": true
+    }
+  ]
+}
