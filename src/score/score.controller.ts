@@ -15,7 +15,13 @@ export class ScoreController {
   async createBatch(@Body() body: { tickers: string[] }) {
     const { tickers } = body;
     const runId = randomUUID();
-    await this.scoreService.enqueueBatch({ tickers, runId });
+    
+    await this.scoreService.createBatch({ tickers, runId });
+    
+    this.scoreService.processBatch({ tickers, runId }).catch((error) => {
+      console.error(`Error processing batch ${runId}:`, error);
+    });
+    
     return { runId, total: tickers.length, status: 'pending' };
   }
 

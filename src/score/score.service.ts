@@ -6,7 +6,7 @@ import { ScoringService } from "../services/scoring/scoring.service";
 
 @Injectable()
 export class ScoreService {
-  async enqueueBatch(options: { tickers: string[]; runId: string }) {
+  async createBatch(options: { tickers: string[]; runId: string }) {
     const { tickers, runId } = options;
 
     if (!db) throw new Error("Database connection is not available");
@@ -19,6 +19,17 @@ export class ScoreService {
       status: "pending",
       paramsJson: { tickers },
     });
+  }
+
+  async processBatch(options: { tickers: string[]; runId: string }) {
+    const { tickers, runId } = options;
+
+    if (!db) throw new Error("Database connection is not available");
+
+    await db
+      .update(scoreRuns)
+      .set({ status: "running" })
+      .where(eq(scoreRuns.id, runId));
 
     const scoringService = new ScoringService(process.env.GEMINI_API_KEY || "");
 
