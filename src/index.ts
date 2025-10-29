@@ -7,12 +7,11 @@ import { AppModule } from "./app.module";
 const bootstrap = async () => {
   const app = await NestFactory.create(AppModule);
   
-  const allowedOrigins: string[] = [
+  const staticOrigins = [
     "http://localhost:8080",
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:5174",
-    "https://db-global-hackathon-pjh7hri0q-kanekis-projects-237d2960.vercel.app",
   ];
 
   if (process.env.FRONTEND_URL) {
@@ -21,18 +20,39 @@ const bootstrap = async () => {
       const url = new URL(frontendUrl);
       const origin = `${url.protocol}//${url.host}`;
       
-      if (!allowedOrigins.includes(origin)) {
-        allowedOrigins.push(origin);
+      if (!staticOrigins.includes(origin)) {
+        staticOrigins.push(origin);
       }
     } catch (error) {
       console.warn(`Invalid FRONTEND_URL format: ${process.env.FRONTEND_URL}`);
     }
   }
 
-  console.log(`🔒 CORS enabled for origins: ${allowedOrigins.join(", ")}`);
+  const corsOriginFunction = (
+    origin: string | undefined,
+    callback: (error: Error | null, allow?: boolean) => void
+  ): void => {
+    if (!origin) {
+      callback(null, true);
+      return;
+    }
+
+    const isStaticOrigin = staticOrigins.includes(origin);
+    const isDbGlobalHackathonOrigin = origin.startsWith("https://db-global-hackathon");
+
+    if (isStaticOrigin || isDbGlobalHackathonOrigin) {
+      callback(null, true);
+    } else {
+      callback(null, false);
+    }
+  };
+
+  console.log(`🔒 CORS enabled for:`);
+  console.log(`   - Static origins: ${staticOrigins.join(", ")}`);
+  console.log(`   - Dynamic origins: https://db-global-hackathon* (all URLs starting with this)`);
 
   app.enableCors({
-    origin: allowedOrigins,
+    origin: corsOriginFunction,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
     allowedHeaders: ["Content-Type", "Authorization"],
     credentials: true,
