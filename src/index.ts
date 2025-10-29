@@ -12,11 +12,24 @@ const bootstrap = async () => {
     "http://localhost:3000",
     "http://localhost:5173",
     "http://localhost:5174",
+    "https://db-global-hackathon-pjh7hri0q-kanekis-projects-237d2960.vercel.app",
   ];
 
   if (process.env.FRONTEND_URL) {
-    allowedOrigins.push(process.env.FRONTEND_URL);
+    try {
+      const frontendUrl = process.env.FRONTEND_URL.trim();
+      const url = new URL(frontendUrl);
+      const origin = `${url.protocol}//${url.host}`;
+      
+      if (!allowedOrigins.includes(origin)) {
+        allowedOrigins.push(origin);
+      }
+    } catch (error) {
+      console.warn(`Invalid FRONTEND_URL format: ${process.env.FRONTEND_URL}`);
+    }
   }
+
+  console.log(`🔒 CORS enabled for origins: ${allowedOrigins.join(", ")}`);
 
   app.enableCors({
     origin: allowedOrigins,
