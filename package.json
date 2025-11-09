@@ -16,7 +16,8 @@
     "db:generate": "drizzle-kit generate:pg",
     "db:push": "drizzle-kit push:pg --schema ./src/db/schema.ts --driver pg",
     "db:studio": "drizzle-kit studio",
-    "db:migrate": "tsx src/db/migrate.ts"
+    "db:migrate": "tsx src/db/migrate.ts",
+    "db:apply-migration": "tsx src/db/apply-migration.ts"
   },
   "dependencies": {
     "@google/generative-ai": "^0.21.0",

@@ -1,37 +1,50 @@
 import {
-  Controller, Post, Get, Param, Body, HttpCode, HttpStatus, Inject,
-} from '@nestjs/common';
-import { randomUUID } from 'crypto';
-import { ScoreService } from './score.service';
+  Controller,
+  Post,
+  Get,
+  Param,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Inject,
+} from "@nestjs/common";
+import { randomUUID } from "crypto";
+import { ScoreService } from "./score.service";
+import { CreateBatchDto } from "./score.dto";
 
-@Controller('score')
+@Controller("score")
 export class ScoreController {
-  constructor(@Inject(ScoreService) private readonly scoreService: ScoreService) {
-    console.log('ScoreController initialized - scoreService exists?', !!this.scoreService);
+  constructor(
+    @Inject(ScoreService) private readonly scoreService: ScoreService
+  ) {
+    console.log(
+      "ScoreController initialized - scoreService exists?",
+      !!this.scoreService
+    );
   }
 
-  @Post('batch')
+  @Post("batch")
   @HttpCode(HttpStatus.CREATED)
-  async createBatch(@Body() body: { tickers: string[] }) {
+  async createBatch(@Body() body: CreateBatchDto) {
     const { tickers } = body;
     const runId = randomUUID();
-    
+
     await this.scoreService.createBatch({ tickers, runId });
-    
+
     this.scoreService.processBatch({ tickers, runId }).catch((error) => {
       console.error(`Error processing batch ${runId}:`, error);
     });
-    
-    return { runId, total: tickers.length, status: 'pending' };
+
+    return { runId, total: tickers.length, status: "pending" };
   }
 
-  @Get(':runId')
-  async getBatchStatus(@Param('runId') runId: string) {
+  @Get(":runId")
+  async getBatchStatus(@Param("runId") runId: string) {
     return this.scoreService.getBatchStatus(runId);
   }
 
-  @Get('ticker/:ticker')
-  async getTickerScore(@Param('ticker') ticker: string) {
+  @Get("ticker/:ticker")
+  async getTickerScore(@Param("ticker") ticker: string) {
     return this.scoreService.getTickerScore(ticker);
   }
 }
